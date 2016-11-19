@@ -4,10 +4,18 @@
  * and open the template in the editor.
  */
 package com.main;
+
 import java.awt.Color;
 import java.sql.*;
 import javax.swing.*;
 import net.proteanit.sql.DbUtils;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartFrame;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.data.jdbc.JDBCCategoryDataset;
 /**
  *
  * @author soory
@@ -21,12 +29,13 @@ public class Welcome extends javax.swing.JFrame {
     ResultSet rs = null;
     ResultSet rs1 = null;
     ResultSet rs2 = null;
+   
     /**
      * Creates new form Welcome
      */
     public Welcome() {
         initComponents();
-        con=MysqlConnect.ConnectDB(); 
+         con=MysqlConnect.ConnectDB(); 
 //        show_info();
     }
 
@@ -56,6 +65,7 @@ public class Welcome extends javax.swing.JFrame {
         jScrollPane3 = new javax.swing.JScrollPane();
         jTable3 = new javax.swing.JTable();
         jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocationByPlatform(true);
@@ -189,6 +199,13 @@ public class Welcome extends javax.swing.JFrame {
             }
         });
 
+        jButton6.setText("BAR CHART");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -201,6 +218,8 @@ public class Welcome extends javax.swing.JFrame {
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton6)
+                .addGap(84, 84, 84)
                 .addComponent(jButton5)
                 .addGap(24, 24, 24))
         );
@@ -211,8 +230,13 @@ public class Welcome extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(11, 11, 11)
+                        .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -235,7 +259,7 @@ public class Welcome extends javax.swing.JFrame {
        jPanel5.setVisible(false);
        jPanel6.setVisible(false);
        try{
-          String sql= "Select * from patient";
+          String sql= "Select fname,lname,DOB,street,pid,street from patient_data";
           ps=con.prepareStatement(sql);
           rs=ps.executeQuery();
           jTable1.setModel(DbUtils.resultSetToTableModel(rs));
@@ -252,7 +276,7 @@ public class Welcome extends javax.swing.JFrame {
        jPanel4.setVisible(false);
        jPanel6.setVisible(false);
        try{
-          String sql1= "Select * from registration";
+          String sql1= "Select code,code_system_name,code_unit,code_value,organization from form_lab_information";
           ps1=con.prepareStatement(sql1);
           rs1=ps1.executeQuery();
           jTable2.setModel(DbUtils.resultSetToTableModel(rs1));
@@ -267,7 +291,7 @@ public class Welcome extends javax.swing.JFrame {
        jPanel4.setVisible(false);
        jPanel5.setVisible(false);
        try{
-          String sql2= "Select * from users";
+          String sql2= "Select patient_name,reason,priority,start_date,end_date,patient_location,organization from patient_visit_information";
           ps2=con.prepareStatement(sql2);
           rs2=ps2.executeQuery();
           jTable3.setModel(DbUtils.resultSetToTableModel(rs2));
@@ -282,6 +306,30 @@ public class Welcome extends javax.swing.JFrame {
         l.show();
         dispose();
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        try
+        {
+          String sql2= "Select patient_name,reason,COUNT(*) FROM patient_visit_information WHERE reason='LUNG CANCER' OR reason ='HEART ATTACK' OR reason ='ASTHMA' OR reason ='HIGH BP' GROUP BY patient_name,reason";
+          ps2=con.prepareStatement(sql2);
+          rs2=ps2.executeQuery();
+           JDBCCategoryDataset dataset = new JDBCCategoryDataset(MysqlConnect.ConnectDB(),sql2);
+//          JFreeChart chart= ChartFactory.createLineChart("Quey chart","patient_name", "reason", dataset, PlotOrientation.VERTICAL,false,true,true);
+//           BarRenderer rener = null;
+//           CategoryPlot plot = null;
+//           rener = new BarRenderer();
+            JFreeChart chart = ChartFactory.createBarChart("count(*)", "patient_name", "reason", dataset, PlotOrientation.VERTICAL, false,true,true);
+           CategoryPlot p = chart.getCategoryPlot();
+           p.setRangeGridlinePaint(Color.black);
+           ChartFrame fra = new ChartFrame("Analytics Report", chart);
+           fra.setVisible(true);
+           fra.setSize(400,650);
+        }
+        catch(Exception e){
+            JOptionPane.showMessageDialog(null, e);
+        }
+        
+    }//GEN-LAST:event_jButton6ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -324,6 +372,7 @@ public class Welcome extends javax.swing.JFrame {
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;

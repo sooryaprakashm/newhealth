@@ -131,24 +131,23 @@ public class Login extends javax.swing.JFrame {
                   JOptionPane.showMessageDialog(null, "Empty fields detected ! Please fill up all fields");
                   else if(txtPassword.getPassword().length==0)  // Checking for empty field
                   JOptionPane.showMessageDialog(null, "Empty fields detected ! Please fill up all fields");
-                   con=MysqlConnect.ConnectDB();
-                   username=txtUsername.getText();
-                   pwd=txtPassword.getText();
-                   Statement st=con.createStatement();
-                   ResultSet rs=st.executeQuery("select * from patient where username='"+username+"' and password='"+pwd+"' "); 
-                    while(rs.next() == true){
+                  con=MysqlConnect.ConnectDB();
+                  username=txtUsername.getText();
+                  pwd=txtPassword.getText();
+                  Statement st=con.createStatement();
+                  ResultSet rs=st.executeQuery("select * from patient where username='"+username+"' and password='"+pwd+"' "); 
+                    while(rs.next()){
                         if(rs.getString(2).equals(username) && rs.getString(3).equals(pwd)){
                         JOptionPane.showMessageDialog(null,"WELCOME" + username);
                         Welcome w = new Welcome();
                         w.show();
                         dispose();
                     }
-                    
                     else{
-                        JOptionPane.showMessageDialog(null,"WRONG","Access denied",JOptionPane.ERROR_MESSAGE);
-                        
+                        JOptionPane.showMessageDialog(null,"WRONG");  
                     }
-               }}
+               }
+               }
          catch(Exception e){
              JOptionPane.showMessageDialog(null, e);
          }
